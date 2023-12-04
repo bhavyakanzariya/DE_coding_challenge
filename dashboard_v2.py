@@ -61,15 +61,26 @@ st.sidebar.text(f"Average Cost of Books: £{average_cost:.2f}")
 st.sidebar.text(f"Availibility : {availability}%")
 
 # Filtered Book List
-st.header("Filtered Book List")
-min_price, max_price = st.slider("Select Price Range", min_value=df['price'].min(), max_value=df['price'].max(), value=(df['price'].min(), df['price'].max()))
-selected_ratings = st.radio("Select Ratings", sorted(df['rating'].unique()))
+st.header("Apply Filters")
+min_price, max_price = st.slider("Select Price Range", min_value=df['price'].min(), max_value=df['price'].max(), value=(df['price'].min(), df['price'].max()))# Get unique ratings from the DataFrame
+# Get unique ratings from the DataFrame
+# Get unique ratings from the DataFrame
+all_ratings = sorted(df['rating'].unique())
 
-filtered_books = df[(df['price'] >= min_price) & (df['price'] <= max_price) & (df['rating'] == selected_ratings)]
+# Default selection is set to all ratings
+select_all_ratings = st.checkbox("Select All Ratings", value=True)
+
+# If "Select All Ratings" is not checked, create individual checkboxes for each rating
+selected_ratings = all_ratings if select_all_ratings else st.multiselect("Select Ratings", all_ratings, default=all_ratings)
+
+# Filter DataFrame based on selected ratings
+filtered_books = df[(df['price'] >= min_price) & (df['price'] <= max_price) & (df['rating'].isin(selected_ratings))]
+
+
 st.dataframe(filtered_books)
 
 # Main content area
-st.header("Price Distribution")
+#st.header("Price Distribution")
 min_price = df['price'].min()
 max_price = df['price'].max()
 start_bin = int(min_price)
@@ -84,12 +95,12 @@ fig_price_distribution = px.histogram(df, x='price', range_x=[start_bin, end_bin
 st.plotly_chart(fig_price_distribution)
 
 # Pie Chart of Ratings
-st.header("Ratings Distribution")
+#st.header("Ratings Distribution")
 fig_ratings_pie = px.pie(df, names='rating', title='Ratings Distribution')
 st.plotly_chart(fig_ratings_pie)
 
 # Average Price by Star Rating
-st.header("Average Price by Star Rating")
+#st.header("Average Price by Star Rating")
 avg_price_by_rating = df.groupby('rating')['price'].mean().reset_index()
 
 # Bar Chart
